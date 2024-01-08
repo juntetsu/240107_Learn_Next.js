@@ -85,3 +85,25 @@ export default function NavLinks() {
   );
 }
 ```
+
+## データベース（@vercel/postgres）
+
+まずは、`vercel`にサインイン→デプロイ
+
+### DB作成
+
+1. Continue to Dashboardをクリック
+2. プロジェクトダッシュボードからStorage
+3. Connect Store → Create New → Postgres → Continue
+4. 任意のデータベース名→リージョンはワシントン（後からリージョンは変更不可。24.01現在Japanはなし）
+
+### .env（.local）ファイル
+
+1. 作成が終わったら`.env.local`タブに移動し`Show secret`→`Copy Snippet`
+2. コードエディターに移動し`.env`ファイル作成→コピーしたもの貼り付け
+3. `.gitignore`ファイルに`.env`記述忘れずに
+4. ターミナルで`npm i @vercel/postgres`を実行し、`Vercel Postgres SDK`をインストールする。
+
+### 初期データ挿入
+seedとやら  
+[Nextjs.org](https://nextjs.org/learn/dashboard-app/setting-up-your-database)参照  
