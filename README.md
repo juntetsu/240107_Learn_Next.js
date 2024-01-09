@@ -107,3 +107,7 @@ export default function NavLinks() {
 ### 初期データ挿入
 seedとやら  
 [Nextjs.org](https://nextjs.org/learn/dashboard-app/setting-up-your-database)参照  
+
+## 🔰Fetching  Data
+
+DB作成〜
