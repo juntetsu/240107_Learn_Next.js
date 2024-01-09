@@ -105,9 +105,53 @@ export default function NavLinks() {
 4. ターミナルで`npm i @vercel/postgres`を実行し、`Vercel Postgres SDK`をインストールする。
 
 ### 初期データ挿入
-seedとやら  
-[Nextjs.org](https://nextjs.org/learn/dashboard-app/setting-up-your-database)参照  
 
-## 🔰Fetching  Data
+seedとやら  
+[Nextjs.org](https://nextjs.org/learn/dashboard-app/setting-up-your-database)参照
+
+## 🔰Fetching Data
 
 DB作成〜
+
+## 🔰Static and Dynamic Rendering
+
+- ウォーターフォール（前の処理が終わるまで待つ必要がある。↔︎ データ取得を同時に実行する"Parallel Data Fetching"）
+- 静的レンダリングなので、データの更新はアプリケーションに反映されない
+
+### 静的レンダリングとは
+
+> 静的レンダリングでは、データのフェッチとレンダリングは、ビルド時（デプロイ時）または再検証時にサーバー上で行われる。その後、結果をコンテンツ・デリバリー・ネットワーク（CDN）に配信し、キャッシュすることができます。
+
+利点
+
+- 高速
+- サーバー負荷の軽減
+- SEO対策
+
+更新頻度の低いブログや製品ページなど。
+
+### 動的レンダリングとは
+
+> リクエスト時（ユーザーがページにアクセスした時）に、各ユーザーに対してサーバー上でコンテンツがレンダリングされます。
+
+#### 利点
+
+- リアルタイムデータ
+- User-Specific Content
+- Request Time Information
+
+### データの取得を静的→動的に
+
+next/cacheからunstable_noStoreをインポート
+
+```javascript
+import { unstable_noStore as noStore } from 'next/cache';
+
+export async function fetchRevenue() {
+  // Add noStore() here to prevent the response from being cached.
+  // This is equivalent to in fetch(..., {cache: 'no-store'}).
+  noStore();
+
+  // ...
+}
+```
