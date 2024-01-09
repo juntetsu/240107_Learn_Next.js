@@ -113,6 +113,9 @@ seedとやら
 
 DB作成〜
 
+ウォーターフォール（前の処理が終わるまで次の処理が実行されない。=待つ時間が発生する）を避ける方法。  
+→JavaScriptでは、Promise.all()またはPromise.allSettled()関数を使用して、すべてのプロミスを同時に開始することができる。
+
 ## 🔰Static and Dynamic Rendering
 
 - ウォーターフォール（前の処理が終わるまで待つ必要がある。↔︎ データ取得を同時に実行する"Parallel Data Fetching"）
@@ -155,3 +158,108 @@ export async function fetchRevenue() {
   // ...
 }
 ```
+
+しかし、極端に遅い処理がひとつでもある場合、結果的にページ全体の処理が遅くなる。
+
+## 🔰Streaming
+
+https://nextjs.org/learn/dashboard-app/streaming
+
+前の章では、ダッシュボード・ページをダイナミックにしましたが、データ・フェッチの遅さがアプリケーションのパフォーマンスにどのような影響を与えるかについて説明しました。ここでは、遅いデータリクエストがあったときにユーザーエクスペリエンスを改善する方法を見ていきましょう。
+
+Next.js の App Router では `<Suspense>` を使ったストリーミングがサポートされている。  
+`<Suspense>` を使ったストリーミングではページの HTML を小さな塊に分解し、その塊をクライアントに順次送信でき、この `<Suspense>` を使うことで、ページの一部をより早く表示できる。
+
+![Alt text](streaming.png)
+
+以下でやること
+
+1. ページレベルで`loading.tsx`ファイルを使用
+2. 特定のコンポーネントでは`<Suspense>`を使用する
+
+### loading.tsx
+
+データ読み込みが完了するまで「Loading...」と表示させる。
+
+loading.tsx
+
+```javascript
+export default function Loading() {
+  return <div>Loading...</div>;
+}
+```
+
+ローディングスケルトンを表示させる例
+skeltons.tsx
+
+```javascript
+export default function DashboardSkeleton() {
+  return (
+    <>
+      <div
+        className={`${shimmer} relative mb-4 h-8 w-36 overflow-hidden rounded-md bg-gray-100`}
+      />
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <CardSkeleton />
+        <CardSkeleton />
+        <CardSkeleton />
+        <CardSkeleton />
+      </div>
+      <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-4 lg:grid-cols-8">
+        <RevenueChartSkeleton />
+        <LatestInvoicesSkeleton />
+      </div>
+    </>
+  );
+}
+```
+
+loading.tsx
+
+```javascript
+import DashboardSkeleton from '@/app/ui/skeletons';
+
+export default function Loading() {
+  return <DashboardSkeleton />;
+}
+```
+
+こんな感じ
+![Alt text](public/skeletons.png)
+
+## ルートにおける()の意味
+
+例えば上記の例で説明すると、ルートディレクトリが以下のようになっているとする。
+
+```
+dashboard
+├─ invoices
+│ 　└─ page.tsx
+├─ customers
+│ 　└─ page.tsx
+├─ loading.tsx
+└─ page.tsx
+```
+
+この場合、dashboardのみならず`invoices` と`customers`ページにもスケルトン（loading.tsx）が適用されてしまう。
+そこで利用されるのが`Route Groups`といって、`dashboard`フォルダ内に`/(overview)`と新しいフォルダを作成し、その中にファイルを移動させることで、URLパス構造に影響を与えることがなくなる。
+
+```
+dashboard
+├─ (overview)
+│ 　├─ loading.tsx
+│ 　└─ page.tsx
+├─ invoices
+│ 　└─ page.tsx
+├─ customers
+│ 　└─ page.tsx
+├─ loading.tsx
+└─ page.tsx
+```
+
+## Suspenseを使って、コンポーネント単位でストリーミングさせる
+処理の遅いコンポーネントだけをストリーミングすることが可能。
+
+1. Reactから`Suspense`をインポート
+2. ストリーミングさせたいコンポーネントを`<Suspense>`で囲む
+3. `fallback`でフォールバックコンポーネント（スケルトン）を渡せる
