@@ -30,5 +30,5 @@ export async function createInvoice(formData: FormData) {
   `;
 
   revalidatePath('/dashboard/invoices');
-  redirect('/dashboard/invoices')
+  redirect('/dashboard/invoices');
 }
